@@ -1,24 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  MediaController,
+  MediaControlBar,
+  MediaTimeRange,
+  MediaTimeDisplay,
+  MediaVolumeRange,
+  MediaPlayButton,
+  MediaSeekBackwardButton,
+  MediaSeekForwardButton,
+  MediaMuteButton,
+} from 'media-chrome/dist/react';
+
+import Hls from 'hls.js';
+
+import { useEffect, useRef } from 'react';
 
 function App() {
+  const videoElement = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+
+    if (videoElement) {
+      const videoSrc = "videos/output.m3u8";
+      if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(videoElement.current as any);
+      }
+    }
+
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ width: '100%' }}>
+      <MediaController style={{ width: '100%' }}>
+        <video
+          width='100%'
+          slot="media"
+          //src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+          preload="auto"
+          muted
+          crossOrigin=""
+          ref={videoElement}
+        />
+        <MediaControlBar>
+          <MediaPlayButton></MediaPlayButton>
+          <MediaSeekBackwardButton></MediaSeekBackwardButton>
+          <MediaSeekForwardButton></MediaSeekForwardButton>
+          <MediaTimeRange></MediaTimeRange>
+          <MediaTimeDisplay showDuration></MediaTimeDisplay>
+          <MediaMuteButton></MediaMuteButton>
+          <MediaVolumeRange></MediaVolumeRange>
+        </MediaControlBar>
+      </MediaController>
     </div>
   );
 }
