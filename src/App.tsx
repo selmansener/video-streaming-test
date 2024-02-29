@@ -12,23 +12,60 @@ import {
 
 import Hls from 'hls.js';
 
-import { useEffect, useRef } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
 function App() {
   const videoElement = useRef<HTMLVideoElement>(null);
+  const [isBusy, setIsBusy] = useState<Boolean>(false);
 
   useEffect(() => {
 
-    if (videoElement) {
-      const videoSrc = "videos/output.m3u8";
-      if (Hls.isSupported()) {
-        var hls = new Hls();
-        hls.loadSource(videoSrc);
-        hls.attachMedia(videoElement.current as any);
-      }
-    }
+    fetch("https://localhost:7016/main/getlastsavepoint")
+      .then((response) => {
+        console.log("resp:",)
+
+        response.json().then(lastSavePoint => {
+          if (videoElement) {
+            console.log("lastSavePoint.LastTimestamp", lastSavePoint.lastTimestamp);
+            const videoSrc = "videos/output.m3u8";
+            if (Hls.isSupported()) {
+              var hls = new Hls({
+                startPosition: lastSavePoint.lastTimestamp
+              });
+              hls.loadSource(videoSrc);
+              hls.attachMedia(videoElement.current as any);
+            }
+          }
+        })
+      })
+      .catch((e) => console.log(e));
 
   }, []);
+
+  const onTimeUpdate = (e: SyntheticEvent) => {
+    const eventTarget = e.target as HTMLVideoElement;
+    if (Math.floor(eventTarget.currentTime) % 5 == 0) {
+      if (!isBusy && eventTarget.currentTime > 5) {
+        setIsBusy(true);
+
+        fetch("https://localhost:7016/main/savepoint", {
+          body: JSON.stringify({
+            "LastTimestamp": eventTarget.currentTime
+          }),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        }).then(() => {
+          setIsBusy(false);
+        }).catch((e) => {
+          console.log(e);
+          setIsBusy(false);
+        })
+      }
+
+    }
+  }
 
   return (
     <div style={{ width: '100%' }}>
@@ -36,11 +73,11 @@ function App() {
         <video
           width='100%'
           slot="media"
-          //src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
           preload="auto"
           muted
           crossOrigin=""
           ref={videoElement}
+          onTimeUpdate={onTimeUpdate}
         />
         <MediaControlBar>
           <MediaPlayButton></MediaPlayButton>
