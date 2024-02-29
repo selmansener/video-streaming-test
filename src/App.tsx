@@ -8,6 +8,9 @@ import {
   MediaSeekBackwardButton,
   MediaSeekForwardButton,
   MediaMuteButton,
+  MediaLoadingIndicator,
+  MediaPlaybackRateButton,
+  MediaFullscreenButton,
 } from 'media-chrome/dist/react';
 
 import Hls from 'hls.js';
@@ -79,6 +82,7 @@ function App() {
           ref={videoElement}
           onTimeUpdate={onTimeUpdate}
         />
+        <MediaLoadingIndicator  slot="centered-chrome" noautohide></MediaLoadingIndicator>
         <MediaControlBar>
           <MediaPlayButton></MediaPlayButton>
           <MediaSeekBackwardButton></MediaSeekBackwardButton>
@@ -87,6 +91,8 @@ function App() {
           <MediaTimeDisplay showDuration></MediaTimeDisplay>
           <MediaMuteButton></MediaMuteButton>
           <MediaVolumeRange></MediaVolumeRange>
+          <MediaPlaybackRateButton></MediaPlaybackRateButton>
+          <MediaFullscreenButton></MediaFullscreenButton>
         </MediaControlBar>
       </MediaController>
     </div>
