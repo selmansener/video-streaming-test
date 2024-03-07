@@ -11,9 +11,12 @@ import {
   MediaLoadingIndicator,
   MediaPlaybackRateButton,
   MediaFullscreenButton,
+  MediaCaptionsButton,
+  MediaCastButton,
+  MediaPosterImage,
 } from 'media-chrome/dist/react';
 
-import Hls from 'hls.js';
+import Hls, { EMEController } from 'hls.js';
 
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
@@ -27,6 +30,8 @@ function App() {
       .then((response) => {
         console.log("resp:",)
 
+        
+
         response.json().then(lastSavePoint => {
           if (videoElement) {
             console.log("lastSavePoint.LastTimestamp", lastSavePoint.lastTimestamp);
@@ -35,6 +40,10 @@ function App() {
               var hls = new Hls({
                 startPosition: lastSavePoint.lastTimestamp
               });
+
+              var emeController = new EMEController(hls);
+              
+
               hls.loadSource(videoSrc);
               hls.attachMedia(videoElement.current as any);
             }
@@ -71,6 +80,7 @@ function App() {
   }
 
   return (
+    
     <div style={{ width: '100%' }}>
       <MediaController style={{ width: '100%' }}>
         <video
@@ -81,9 +91,13 @@ function App() {
           crossOrigin=""
           ref={videoElement}
           onTimeUpdate={onTimeUpdate}
-        />
+        >
+          <track label="English" kind="captions" srcLang="en" src='https://media-chrome.mux.dev/examples/vanilla/vtt/en-cc.vtt' />
+        </video>
         <MediaLoadingIndicator  slot="centered-chrome" noautohide></MediaLoadingIndicator>
         <MediaControlBar>
+          <MediaCastButton></MediaCastButton>
+          <MediaCaptionsButton></MediaCaptionsButton>
           <MediaPlayButton></MediaPlayButton>
           <MediaSeekBackwardButton></MediaSeekBackwardButton>
           <MediaSeekForwardButton></MediaSeekForwardButton>
@@ -93,6 +107,9 @@ function App() {
           <MediaVolumeRange></MediaVolumeRange>
           <MediaPlaybackRateButton></MediaPlaybackRateButton>
           <MediaFullscreenButton></MediaFullscreenButton>
+          <MediaPosterImage slot="poster"
+              src="https://image.mux.com/A3VXy02VoUinw01pwyomEO3bHnG4P32xzV7u1j1FSzjNg/thumbnail.jpg?time=20">
+          </MediaPosterImage>
         </MediaControlBar>
       </MediaController>
     </div>
